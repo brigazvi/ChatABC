@@ -16,7 +16,18 @@ io.on("connection", (socket) => {
   })
   socket.on(`upload message`, (args) => {
     console.log(args.content)
-    io.emit(`download message`, args)
+    io.emit(`download message`, {
+      author: args.author,
+      content: args.content,
+      msgType: `message`,
+    })
+  })
+  socket.on(`upload new user`, (args) => {
+    console.log(args)
+    io.emit(`download new user`, {
+      name: args.name,
+      msgType: `info`,
+    })
   })
 })
 
