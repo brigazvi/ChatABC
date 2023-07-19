@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react"
 import { socket } from "./socket"
-import { ConnectionState } from "./components/ConnectionState"
-import { ConnectionManager } from "./components/ConnectionManager"
-import { MyForm } from "./components/MyForm"
-import { Events } from "./components/Events"
+import Chat from "./pages/Chat"
+import { UserContext } from "./context/UserContext"
+import LoginForm from "./pages/LoginForm"
 
 export default function App() {
+  const [currentUser, setCurrentUser] = useState(``)
   const [isConnected, setIsConnected] = useState(socket.connected)
-  const [fooEvents, setFooEvents] = useState([])
+  const [messages, setMessages] = useState([])
 
   useEffect(() => {
     function onConnect() {
@@ -18,27 +18,22 @@ export default function App() {
       setIsConnected(false)
     }
 
-    function onFooEvent(value) {
-      setFooEvents((previous) => [...previous, value])
-    }
-
     socket.on("connect", onConnect)
     socket.on("disconnect", onDisconnect)
-    socket.on("foo", onFooEvent)
+    socket.on("download message", (args) => {
+      setMessages((prev) => [...prev, args])
+    })
 
     return () => {
       socket.off("connect", onConnect)
       socket.off("disconnect", onDisconnect)
-      socket.off("foo", onFooEvent)
     }
   }, [])
 
   return (
-    <div className="App">
-      <ConnectionState isConnected={isConnected} />
-      <Events events={fooEvents} />
-      <ConnectionManager />
-      <MyForm />
-    </div>
+    <UserContext.Provider value={{ currentUser, setCurrentUser }}>
+      <span>{isConnected ? `connected` : `disconnected`}</span>
+      {currentUser ? <Chat messages={messages} /> : <LoginForm />}
+    </UserContext.Provider>
   )
 }

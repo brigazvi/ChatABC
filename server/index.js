@@ -14,6 +14,10 @@ io.on("connection", (socket) => {
   socket.on(`disconnect`, (reason) => {
     console.log(reason)
   })
+  socket.on(`upload message`, (args) => {
+    console.log(args.content)
+    io.emit(`download message`, args)
+  })
 })
 
 httpServer.listen(4000)
